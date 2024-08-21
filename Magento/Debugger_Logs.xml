@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Debugger_Logs>
+            <active>true</active>
+            <codePool>local</codePool>
+        </Debugger_Logs>
+    </modules>
+</config>
