@@ -1,0 +1,105 @@
+/* Style for timestamps */
+html {
+    width: 100%;
+}
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    font-size: 12px;
+    background: #000;
+    color: #ddd;
+}
+
+.h2 {
+    color: white;
+    display: inline-block;
+    font-size: 1em;
+    font-weight: bold;
+    margin: 0;
+    padding-bottom: 10px;
+}
+.log-types {
+    height: 100vh;
+    display:grid;
+    grid-template-rows: 50% 50%;
+    transition: grid-template-rows 0.5s;
+}
+.log-types.active-expanded {
+    display: block;
+}
+.log-types__item {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.log-types.active-expanded .log-types__item:not(.expanded) {
+    height: 0;
+    overflow: hidden;
+}
+.log-types__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: #141313;
+    border-bottom: 2px solid #4c4545;
+    color: white;
+}
+h2 {
+    font-size: 1.2em;
+    margin: 0;
+}
+.timestamp {
+    font-size: 1.2em;
+    color: white;
+    display: block;
+    padding-left: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+.log-types__content  {
+    flex-grow: 1;
+    overflow: auto;
+    max-height: 83%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #000;
+    color: #ddd;
+    padding: 0 10px;
+    border-radius: 4px;
+    line-height: 20px;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    margin-top: 0;
+    a {
+        color: #93cdfd;
+        text-decoration: none;
+    }
+}
+.log-types.active-expanded .log-types__item.expanded .log-types__content{
+    max-height: initial;
+}
+
+.block {
+    color: #94f894;
+}
+.controller {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #f8d186;
+    text-decoration: none;
+}
+.red {
+    color: #f19292;
+}
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    display: none; /* Hidden by default */
+    z-index: 1000; /* Ensure it is above other elements */
+}

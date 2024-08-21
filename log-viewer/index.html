@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/lib/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <title>Log Viewer</title>
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="log-types">
+    <div id="magento-logs" class="log-types__item">
+        <div class="log-types__header">
+            <h2>Magento</h2>
+            <div class="notification"></div>
+            <div>
+                <button class="clearButton btn btn-sm btn-outline-danger me-2">Clear Logs</button>
+                <a class="log-expand text-primary btn btn-sm">
+                    <i class="bi bi-arrows-angle-expand"></i>
+                </a>
+                <a class="log-contract text-primary btn btn-sm d-none">
+                    <i class="bi bi-arrows-angle-contract"></i>
+                </a>
+            </div>
+        </div>
+        <pre class="logContent log-types__content">Loading...</pre>
+    </div>
+    <div id="root-logs" class="log-types__item">
+        <div class="log-types__header">
+            <h2>Root</h2>
+            <div class="notification"></div>
+            <div>
+                <button class="clearButton btn btn-sm btn-outline-danger me-2">Clear Logs</button>
+                <a class="log-expand text-primary btn btn-sm">
+                    <i class="bi bi-arrows-angle-expand"></i>
+                </a>
+                <a class="log-contract text-primary btn btn-sm d-none">
+                    <i class="bi bi-arrows-angle-contract"></i>
+                </a>
+            </div>
+        </div>
+        <pre class="logContent log-types__content">Loading...</pre>
+    </div>
+</div>
+    <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
