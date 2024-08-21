@@ -3,14 +3,19 @@ import os
 import mimetypes
 from datetime import datetime
 import logging
+from dotenv import load_dotenv
 
-MAGENTO_LOG_FILE_PATH = '/Users/amelie/www/lesgrappes/lesgrapento/var/log/templates.log'
-ROOT_LOG_DIRECTORIES = '/Users/amelie/www/lesgrappes/root/Logs'
-ROOT_LOG_FORMAT_START = 'Debugger.'
-# logging.basicConfig(filename='/Users/amelie/www/lesgrappes/lesgrapento/mydebugger/server.log',
-#                     level=logging.DEBUG,
-#                     format='%(asctime)s %(levelname)s: %(message)s',
-#                     datefmt='%Y-%m-%d %H:%M:%S')
+load_dotenv()
+MAGENTO_LOG_FILE_PATH = os.getenv('MAGENTO_LOG_FILE_PATH')
+ROOT_LOG_DIRECTORIES = os.getenv('ROOT_LOG_DIRECTORIES')
+ROOT_LOG_FORMAT_START = os.getenv('ROOT_LOG_FORMAT_START')
+
+current_file_path = os.path.abspath(__file__)
+current_folder_path = os.path.dirname(current_file_path)
+logging.basicConfig(filename=os.path.join(current_folder_path, 'server.log'),
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 class RequestHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):

@@ -10,9 +10,11 @@ if [ -n "$PID" ]; then
   kill -9 $PID
 fi
 
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
 # Démarrer le serveur Python
-cd /Users/amelie/www/lesgrappes/lesgrapento/mydebugger/
-nohup python3 cors_server.py >> server.log 2>&1 &
+cd "$SCRIPTPATH"
+nohup /usr/local/bin/python3 cors_server.py >> server.log 2>&1 &
 
 # Rendre le script executable
 # chmod +x /Users/amelie/www/lesgrappes/lesgrapento/mydebugger/start_server.sh
