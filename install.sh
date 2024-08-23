@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# appel install_magento_module.sh
+# appel install_root_module.sh
+sh install_magento_module.sh
+sh install_root_module.sh
 # Fonction pour installer pip si manquant
 install_pip() {
     echo "pip not found. Attempting to install pip..."

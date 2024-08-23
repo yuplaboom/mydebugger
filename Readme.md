@@ -5,6 +5,8 @@ Ce projet permet de voir les logs de l'application en temps réel. Il utilise un
 ## 1/ Install
 ```bash
 chmod +x install.sh
+chmod +x install_magento_module.sh
+sh install_magento_module.sh
 sh install.sh
 ```
 

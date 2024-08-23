@@ -1,0 +1,11 @@
+*
+!Dev
+!Dev/**
+!Rec
+!Rec/**
+!/Modules.php
+!Routes.php
+!.gitignore
+**/Settings.php
+**/Modules.php
+**/Routes.php
