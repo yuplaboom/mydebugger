@@ -47,8 +47,9 @@ class Root extends Log {
                         if (line === '') {
                             continue;
                         }
+                        let logCustomKey = "lgroot_front2";
                         // Regex pour extraire la date et le JSON stringifié
-                        const regex = /\[Debug\] (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}\.\d+) \| lgroot_front2 \| WEB \| (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) \| (.*)/;
+                        const regex = new RegExp(`\\[Debug\\] (\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+\\d{2}:\\d{2}\\.\\d+) \\| ${logCustomKey} \\| WEB \\| (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) \\| (.*)`);
                         const match = line.match(regex);
                         if (match) {
                             const date = match[1];
