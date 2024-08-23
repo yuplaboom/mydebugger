@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# appel install_magento_module.sh
-# appel install_root_module.sh
-sh install_magento_module.sh
-sh install_root_module.sh
 # Fonction pour installer pip si manquant
 install_pip() {
     echo "pip not found. Attempting to install pip..."
@@ -90,3 +86,5 @@ fi
 # Lancer le server
 $SCRIPTPATH/start_server.sh
 echo "Server started."
+PYTHON_PATH=$(which python3)
+echo "Make sure you have the correct python path in .env PYTHON_PATH=$PYTHON_PATH"
