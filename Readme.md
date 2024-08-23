@@ -5,7 +5,7 @@ Ce projet permet de voir les logs de l'application en temps réel. Il utilise un
 ## 1/ Install
 ```bash
 cp .env.dist .env
-# Edit file with your configuration
+# Edit file with your configuration. Do Not Use ~/ paths as it will not work as expected. Use /Users/{your_user} instead.
 chmod +x install.sh
 chmod +x install_magento_module.sh
 chmod +x install_root_module.sh
