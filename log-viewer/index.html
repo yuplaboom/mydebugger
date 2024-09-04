@@ -45,6 +45,12 @@
         <pre class="logContent log-types__content">Loading...</pre>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script type="text/javascript">
+        window.md5 = function(string) {
+            return CryptoJS.MD5(string).toString();
+        }
+    </script>
     <script type="module" src="assets/js/main.js"></script>
 </body>
 </html>

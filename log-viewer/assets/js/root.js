@@ -1,6 +1,7 @@
 import Log from "./log.js";
 
 class Root extends Log {
+    keys = [];
     constructor(config, container) {
         super(config, container);
     }
@@ -11,6 +12,7 @@ class Root extends Log {
         if (collapse) {
             return;
         }
+
         fetch(this.config.logUrl)
             .then(response => response.text())
             .then(data => {
@@ -43,12 +45,18 @@ class Root extends Log {
                     // inverse l'ordre des lignes
                     lines.reverse();
                     for (let i = 0; i < lines.length; i++) {
+                        formattedLog = "";
                         let line = lines[i];
                         if (line === '') {
                             continue;
                         }
                         let logCustomKey = "lgroot_front2";
-                        // Regex pour extraire la date et le JSON stringifié
+                        const key = md5(line);
+                        if (this.keys[key]) {
+                            continue;
+                        }
+                        this.keys[key] = true;
+
                         const regex = new RegExp(`\\[Debug\\] (\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\+\\d{2}:\\d{2}\\.\\d+) \\| ${logCustomKey} \\| WEB \\| (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) \\| (.*)`);
                         const match = line.match(regex);
                         if (match) {
@@ -120,13 +128,14 @@ class Root extends Log {
                                 formattedLog += `<div class="logLine"><span class="h2">Response Data:</span><br>${this.formatJsonToHtml(JSON.parse(log.response.data))}</div>`;
                             }
                             formattedLog += `</div>`;
-                            this.container.querySelector('.logContent').innerHTML = formattedLog;
-
+                            var newElement = document.createElement('div');
+                            newElement.innerHTML = formattedLog;
+                            this.container.querySelector('.logContent').insertBefore(newElement, this.container.querySelector('.logContent').firstChild);
                         } else {
                             throw new Error('Log format is invalid');
                         }
                     }
-                    if (formattedLog === '') {
+                    if (!this.keys) {
                         this.container.querySelector('.logContent').innerHTML = 'No log found';
                     }
                 } catch (error) {
