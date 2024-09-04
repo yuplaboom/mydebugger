@@ -79,7 +79,6 @@ class Root extends Log {
                             if (log.request.GET && Object.keys(log.request.GET).length) {
                                 formattedLog += `<div class="logLine"><span class="h2 text-success">GET Params:</span><br>${this.formatJsonToHtml(log.request.GET)}</div>`;
                             }
-                            console.log(log);
                             if (log.request.POST && Object.keys(log.request.POST).length) {
                                 formattedLog += `<div class="logLine"><span class="h2 text-warning">POST Params:</span><br>${this.formatJsonToHtml(log.request.POST)}</div>`;
                             }

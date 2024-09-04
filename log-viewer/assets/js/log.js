@@ -8,20 +8,25 @@ class Log {
         this.container.querySelector('.logContent').addEventListener('click', (event) => {
             if (event.target && event.target.matches('.toCopy')) {
                 event.preventDefault();
-                const path = event.target.getAttribute('data-path');
+                let value = "";
+                if (event.target.getAttribute('data-target')) {
+                    value = document.querySelector(event.target.getAttribute('data-target')).textContent;
+                } else if (event.target.getAttribute('data-path')) {
+                    value = event.target.getAttribute('data-path');
+                }
                 if (!navigator.clipboard) {
                     let textArea = document.createElement("textarea");
-                    textArea.value = path;
+                    textArea.value = value;
                     document.body.appendChild(textArea);
                     textArea.focus();
                     textArea.select();
                     textArea.style.position = "absolute";
                     textArea.style.left = "-999999px";
                     document.execCommand('copy');
-                    this.showNotification('copied to clipboard: ' + path);
+                    this.showNotification('copied to clipboard');
                 } else {
                     navigator.clipboard.writeText(path)
-                        .then(() => this.showNotification('copied to clipboard: ' + path))
+                        .then(() => this.showNotification('copied to clipboard'))
                         .catch(err => console.error('Failed to copy controller:', err));
                 }
             }
@@ -59,7 +64,8 @@ class Log {
         return `<span class="text-warning">${method}</span>`;
     }
     formatJsonToHtml(data) {
-        return JSON.stringify(data, null, 2).replace(/(?:\\[rn])+/g, '<br>');
+        let fakeUuid = "id" + Math.random().toString(16).slice(2);
+        return '<a class="toCopy" data-target="#'+fakeUuid+'">Copier</a><br><div id="'+fakeUuid+'">'+JSON.stringify(data, null, 2).replace(/(?:\\[rn])+/g, '<br>')+'</div>';
     }
     fetchLog() {
         fetch(this.config.logUrl)
