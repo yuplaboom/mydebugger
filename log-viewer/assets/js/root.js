@@ -88,10 +88,10 @@ class Root extends Log {
                                 formattedLog += `<div class="logLine"><span class="h2 text-success">GET Params:</span><br>${this.formatJsonToHtml(log.request.GET)}</div>`;
                             }
                             if (log.request.POST && Object.keys(log.request.POST).length) {
-                                formattedLog += `<div class="logLine"><span class="h2 text-warning">POST Params:</span><br>${this.formatJsonToHtml(log.request.POST)}</div>`;
+                                formattedLog += `<div class="logLine"><span class="h2 text-warning">POST Params:</span><br>${this.formatJsonToHtml(log.request.POST, true)}</div>`;
                             }
                             if (log.request.body) {
-                                formattedLog += `<div class="logLine"><span class="h2 text-warning">Request Data:</span><br>${this.formatJsonToHtml(JSON.parse(log.request.body))}</div>`;
+                                formattedLog += `<div class="logLine"><span class="h2 text-warning">Request Data:</span><br>${this.formatJsonToHtml(JSON.parse(log.request.body), true)}</div>`;
                             }
                             if (log.errors && Object.keys(log.errors).length) {
                                 const errors = log.errors;
@@ -125,7 +125,7 @@ class Root extends Log {
                             formattedLog += `\t<b>acl</b> ${log.user?.acl ?? null}<br>`;
                             formattedLog += `</div><br>`;
                             if (log.response.data) {
-                                formattedLog += `<div class="logLine"><span class="h2">Response Data:</span><br>${this.formatJsonToHtml(JSON.parse(log.response.data))}</div>`;
+                                formattedLog += `<div class="logLine"><span class="h2">Response Data:</span><br>${this.formatJsonToHtml(JSON.parse(log.response.data), true)}</div>`;
                             }
                             formattedLog += `</div>`;
                             var newElement = document.createElement('div');
@@ -135,8 +135,11 @@ class Root extends Log {
                             throw new Error('Log format is invalid');
                         }
                     }
-                    if (!this.keys) {
-                        this.container.querySelector('.logContent').innerHTML = 'No log found';
+                    if (Object.keys(this.keys).length) {
+                        this.container.querySelector('.loading')?.remove();
+                        this.container.querySelector('.noLog')?.remove();
+                    } else {
+                        this.container.querySelector('.logContent').innerHTML = '<span class="noLog">No log found</span';
                     }
                 } catch (error) {
                     console.error('Error formatting log:', error);
@@ -144,6 +147,11 @@ class Root extends Log {
                 }
             })
             .catch(error => console.error('Failed to fetch log file:', error));
+    }
+
+    afterLogCleared() {
+        super.afterLogCleared();
+        this.keys = [];
     }
 }
 

@@ -24,6 +24,7 @@ class Log {
                     textArea.style.left = "-999999px";
                     document.execCommand('copy');
                     this.showNotification('copied to clipboard');
+                    textArea.remove();
                 } else {
                     navigator.clipboard.writeText(path)
                         .then(() => this.showNotification('copied to clipboard'))
@@ -63,9 +64,15 @@ class Log {
         }
         return `<span class="text-warning">${method}</span>`;
     }
-    formatJsonToHtml(data) {
+    formatJsonToHtml(data, allowCopy = false) {
         let fakeUuid = "id" + Math.random().toString(16).slice(2);
-        return '<a class="toCopy" data-target="#'+fakeUuid+'">Copier</a><br><div id="'+fakeUuid+'">'+JSON.stringify(data, null, 2).replace(/(?:\\[rn])+/g, '<br>')+'</div>';
+        let string = "";
+        if (allowCopy) {
+            string += '<a class="toCopy" href="javascript:void(0);" data-target="#'+fakeUuid+'">Copier</a><br>';
+        }
+        string += '<div id="'+fakeUuid+'">'+JSON.stringify(data, null, 2).replace(/(?:\\[rn])+/g, '<br>')+'</div>';
+
+        return string;
     }
     fetchLog() {
         fetch(this.config.logUrl)
@@ -91,8 +98,13 @@ class Log {
                 setTimeout(() => {
                     this.showNotification('file logs cleared');
                 } );
+                this.afterLogCleared();
             })
             .catch(error => console.error('Failed to clear log file:', error));
+    }
+
+    afterLogCleared() {
+        this.container.querySelector('.logContent').innerHTML = '<span class="noLog">No log found</span';
     }
 
     formatStatusCode(statusCode) {
