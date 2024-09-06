@@ -50,7 +50,7 @@ class Root extends Log {
                         if (line === '') {
                             continue;
                         }
-                        let logCustomKey = "lgroot_front2";
+                        let logCustomKey = getEnv('ROOT_LOG_CUSTOM_KEY');
                         const key = md5(line);
                         if (this.keys[key]) {
                             continue;

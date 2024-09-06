@@ -3,12 +3,14 @@ import os
 import mimetypes
 from datetime import datetime
 import logging
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 MAGENTO_LOG_FILE_PATH = os.getenv('MAGENTO_LOG_FILE_PATH')
 ROOT_LOG_DIRECTORIES = os.getenv('ROOT_LOG_DIRECTORIES')
 ROOT_LOG_FORMAT_START = os.getenv('ROOT_LOG_FORMAT_START')
+ROOT_LOG_CUSTOM_KEY = os.getenv('ROOT_LOG_CUSTOM_KEY')
 
 current_file_path = os.path.abspath(__file__)
 current_folder_path = os.path.dirname(current_file_path)
@@ -38,6 +40,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif self.path == '/log':
             self.handle_log_view()
+            return
+        elif self.path == '/assets/js/env.js':
+            self.handle_env_js_request()
             return
         else:
 #             logging.info(f"Method: {self.command}")
@@ -119,6 +124,30 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'Log cleared')
 
+    def handle_env_js_request(self):
+        try:
+            # Liste des variables à exposer dans le fichier JS
+            exposed = ['ROOT_LOG_CUSTOM_KEY']
+            exposedVarArr = {key: os.getenv(key) for key in exposed}
+
+            # Générer le contenu JS
+            js_content = f"const ENV = {json.dumps(exposedVarArr)};"
+            js_content += "\n"
+            js_content += "export default ENV;"
+            # Envoyer la réponse HTTP
+            self.send_response(200)
+            self.send_header('Content-type', 'application/javascript')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(js_content.encode())
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-type', 'text/plain')
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(f'Error: {e}'.encode())
+            logging.error(f'Error: {e}')
+
     def serve_static_file(self, path):
         try:
             base_path = 'log-viewer'
@@ -162,6 +191,7 @@ def run(server_class=HTTPServer, handler_class=RequestHandler, port=9090):
     httpd = server_class(server_address, handler_class)
     logging.debug(f'Starting httpd server on port {port}...')
     httpd.serve_forever()
+
 
 if __name__ == '__main__':
     run(port=9090)
