@@ -43,7 +43,6 @@ class Root extends Log {
                 try {
                     let formattedLog = '';
                     // inverse l'ordre des lignes
-                    lines.reverse();
                     for (let i = 0; i < lines.length; i++) {
                         formattedLog = "";
                         let line = lines[i];
