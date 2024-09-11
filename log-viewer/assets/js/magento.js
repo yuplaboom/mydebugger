@@ -1,6 +1,7 @@
 import Log from "./log.js";
 
 class Magento extends Log {
+    keys = [];
     constructor(config, container) {
         super(config, container);
     }
@@ -11,33 +12,34 @@ class Magento extends Log {
         if (collapse) {
             return;
         }
+        const baseLog = {
+            'id': '',
+            'timestamp': null,
+            'errors': [],
+            'warnings': [],
+            'notices': [],
+            'formattedTimestamp': null,
+            'statusCode': '',
+            'apiStatusCode': '',
+            'url': '',
+            'formattedUrl': '',
+            'controller': '',
+            'userId': '',
+            'userEmail': '',
+            'adminId': '',
+            'adminEmail': '',
+            'formattedController': '',
+            'templatesString': [],
+            'getParams': '',
+            'postParams': '',
+            'responseData': '',
+            'requestMethod': '',
+        };
         fetch(this.config.logUrl)
             .then(response => response.text())
             .then(data => {
                 const groupedByTimestamp = [];
                 const lines = data.split('\n');
-                const baseLog = {
-                    'timestamp': null,
-                    'errors': [],
-                    'warnings': [],
-                    'notices': [],
-                    'formattedTimestamp': null,
-                    'statusCode': '',
-                    'apiStatusCode': '',
-                    'url': '',
-                    'formattedUrl': '',
-                    'controller': '',
-                    'userId': '',
-                    'userEmail': '',
-                    'adminId': '',
-                    'adminEmail': '',
-                    'formattedController': '',
-                    'templatesString': [],
-                    'getParams': '',
-                    'postParams': '',
-                    'responseData': '',
-                    'requestMethod': '',
-                };
                 let currentLog = JSON.parse(JSON.stringify(baseLog));
 
                 for (let i = 0; i < lines.length; i++) {
@@ -46,6 +48,7 @@ class Magento extends Log {
                     let formattedTimestamp = '';
                     if (timestampMatch) {
                         if (currentLog.timestamp !== null) {
+                            currentLog.id = md5(currentLog.timestamp + currentLog.url + currentLog.controller);
                             groupedByTimestamp.push(currentLog);
                             currentLog = JSON.parse(JSON.stringify(baseLog));
                         }
@@ -94,7 +97,7 @@ class Magento extends Log {
                     if (getParamsMatch) {
                         const jsonString = getParamsMatch[1];
                         const jsonData = JSON.parse(jsonString);
-                        const formattedJson = JSON.stringify(jsonData, null, 2).replace(/(?:\\[rn])+/g, '<br>');
+                        const formattedJson = this.formatJsonToHtml(jsonData);
                         currentLog.getParams = formattedJson;
                         continue;
                     }
@@ -102,7 +105,8 @@ class Magento extends Log {
                     if (postParamsMatch) {
                         const jsonString = postParamsMatch[1];
                         const jsonData = JSON.parse(jsonString);
-                        const formattedJson = JSON.stringify(jsonData, null, 2).replace(/(?:\\[rn])+/g, '<br>');
+
+                        const formattedJson = this.formatJsonToHtml(jsonData);
                         currentLog.postParams = formattedJson;
                         continue;
                     }
@@ -114,7 +118,9 @@ class Magento extends Log {
                         if (jsonData.status) {
                             currentLog.apiStatusCode = this.formatStatusCode(jsonData.status);
                         }
-                        const formattedJson = JSON.stringify(jsonData, null, 2).replace(/(?:\\[rn])+/g, '<br>');
+
+                        let result = this.replaceHTMLInJSON(jsonData);
+                        const formattedJson = this.formatJsonToHtml(result);
                         currentLog.responseData = formattedJson;
                         continue;
                     }
@@ -156,55 +162,101 @@ class Magento extends Log {
                             return `Block: <a class="block toCopy" href="#" data-path="${blockName}">${blockName}</a>`;
                         });
                 }
+                currentLog.id = md5(currentLog.timestamp + currentLog.url + currentLog.controller);
                 groupedByTimestamp.push(currentLog);
-                groupedByTimestamp.sort((a, b) => b.timestamp - a.timestamp);
-                let formattedLog = '';
+                function createEl(string) {
+                    let template = document.createElement('template');
+                    template.innerHTML = string;
+                    return template.content.firstChild;
+                }
                 for (let i = 0; i < groupedByTimestamp.length; i++) {
                     const log = groupedByTimestamp[i];
+                    let key = log.id;
+                    if (this.keys[key]) {
+                        continue;
+                    }
+                    this.keys[key] = true;
                     if (this.config.avoidUrls.includes(log.url)) {
                         continue;
                     }
-                    formattedLog += `<div><a class="logLine" data-bs-toggle="collapse" href="#panel-${i}">${log.formattedTimestamp} - ${log.url} - ${log.requestMethod} - ${log.statusCode} ${log.apiStatusCode ? '- '+log.apiStatusCode : ''}</a></div>`;
-                    formattedLog += `<div class="collapse" id="panel-${i}">`;
-                    formattedLog += `<div class="logLine"><span class="h2">Controller:</span> <a class="path toCopy controller" href="#" data-path="${log.controller}">${log.controller}</a></div>`;
+                    let newElement = document.createElement('div');
+
+                    newElement.append(createEl(`<div><a class="logLine" data-bs-toggle="collapse" href="#panel-${i}">${log.formattedTimestamp} - ${log.url} - ${log.requestMethod} - ${log.statusCode} ${log.apiStatusCode ? '- '+log.apiStatusCode : ''}</a></div>`));
+                    let collapse = createEl(`<div class="collapse" id="panel-${i}"></div>`);
+                    collapse.append(createEl(`<div class="logLine"><span class="h2">Controller:</span> <a class="path toCopy controller" href="#" data-path="${log.controller}">${log.controller}</a></div>`));
                     if (log.errors.length) {
-                        formattedLog += `<div class="logLine"><span class="h2 text-danger">Errors:</span></div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2 text-danger">Errors:</span></div>`));
                     }
                     log.errors.forEach(error => {
-                        formattedLog += `<div class="logLine text-danger">${error}</div>`;
+                        collapse.append(createEl(`<div class="logLine text-danger">${error}</div>`));
                     });
                     if (log.warnings.length) {
-                        formattedLog += `<div class="logLine"><span class="h2 text-warning">Warnings:</span></div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2 text-warning">Warnings:</span></div>`));
                     }
                     log.warnings.forEach(warning => {
-                        formattedLog += `<div class="logLine text-warning">${warning}</div>`;
+                        collapse.append(createEl(`<div class="logLine text-warning">${warning}</div>`));
                     });
-                    formattedLog += `<div class="logLine"><span class="h2">Url:</span> <a class="path toCopy" href="#" data-path="${log.url}">${log.url}</a></div>`;
+                    collapse.append(createEl(`<div class="logLine"><span class="h2">Url:</span> <a class="path toCopy" href="#" data-path="${log.url}">${log.url}</a></div>`));
                     if (log.getParams.length > 0) {
-                        formattedLog += `<div class="logLine"><span class="h2">GET Params:</span><br>${log.getParams}</div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2">GET Params:</span><br>${log.getParams}</div>`));
                     }
                     if (log.postParams.length > 0) {
-                        formattedLog += `<div class="logLine"><span class="h2">POST Params:</span><br>${log.postParams}</div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2">POST Params:</span><br>${log.postParams}</div>`));
                     }
-                    formattedLog += `<div class="logLine"><span class="h2">User ID:</span> ${log.userId}</div>`;
-                    formattedLog += `<div class="logLine"><span class="h2">User Email:</span> ${log.userEmail}</div>`;
+                    collapse.append(createEl(`<div class="logLine"><span class="h2">User ID:</span> ${log.userId}</div>`));
+                    collapse.append(createEl(`<div class="logLine"><span class="h2">User Email:</span> ${log.userEmail}</div>`));
                     if (log.notices.length) {
-                        formattedLog += `<div class="logLine"><span class="h2 text-info">Notices:</span></div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2 text-info">Notices:</span></div>`));
                     }
                     log.notices.forEach(notice => {
-                        formattedLog += `<div class="logLine text-info">${notice}</div>`;
+                        collapse.append(createEl(`<div class="logLine text-info">${notice}</div>`));
                     });
                     if (log.templatesString.length > 0) {
-                        formattedLog += `<div class="logLine">${log.templatesString}</div>`;
+                        collapse.append(createEl(`<div class="logLine">${log.templatesString}</div>`));
                     }
                     if (log.responseData.length > 0) {
-                        formattedLog += `<div class="logLine"><span class="h2">Response Data:</span><br>${log.responseData}</div>`;
+                        collapse.append(createEl(`<div class="logLine"><span class="h2">Response Data:</span><br>${log.responseData}</div>`, true));
                     }
-                    formattedLog += `</div>`;
+                    newElement.append(collapse);
+                    this.container.querySelector('.logContent').prepend(newElement);
                 }
-                this.container.querySelector('.logContent').innerHTML = formattedLog;
+                if (Object.keys(this.keys).length) {
+                    this.container.querySelector('.loading')?.remove();
+                    this.container.querySelector('.noLog')?.remove();
+                } else {
+                    this.container.querySelector('.logContent').innerHTML = '<span class="noLog">No log found</span';
+                }
             })
             .catch(error => console.error('Failed to fetch log file:', error));
+    }
+    replaceHTMLInJSON(obj) {
+        const isHTMLString = (str) => {
+            const regex = /<([a-z][\w-]*)(?:[^>]*?)>(.*?)<\/\1>|<([a-z][\w-]*)\s*\/?>/i;
+            return typeof str === 'string' && regex.test(str);
+        };
+
+        const traverseAndReplace = (data) => {
+            if (Array.isArray(data)) {
+                // Si c'est un tableau, on parcourt chaque élément
+                return data.map(traverseAndReplace);
+            } else if (typeof data === 'object' && data !== null) {
+                // Si c'est un objet, on parcourt chaque clé
+                for (let key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        data[key] = traverseAndReplace(data[key]);
+                    }
+                }
+                return data;
+            } else if (isHTMLString(data)) {
+                // Si c'est une chaîne HTML, on la remplace par "some HTML content"
+                return "some HTML content";
+            } else {
+                // Sinon, on retourne la donnée inchangée
+                return data;
+            }
+        };
+
+        return traverseAndReplace(obj);
     }
 }
 

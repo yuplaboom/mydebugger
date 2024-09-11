@@ -70,9 +70,20 @@ class Log {
         if (allowCopy) {
             string += '<a class="toCopy" href="javascript:void(0);" data-target="#'+fakeUuid+'">Copier</a><br>';
         }
-        string += '<div id="'+fakeUuid+'">'+JSON.stringify(data, null, 2).replace(/(?:\\[rn])+/g, '<br>')+'</div>';
+        string += '<div id="'+fakeUuid+'">'+this.stringifyJSON(data)+'</div>';
 
         return string;
+    }
+
+    stringifyJSON(data) {
+        let str =  JSON.stringify(data, null, 2);
+        str
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        str.replace(/(?:\\[rn])+/g, '<br>');
+
+        return str;
     }
     fetchLog() {
         fetch(this.config.logUrl)
