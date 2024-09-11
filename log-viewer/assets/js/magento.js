@@ -38,6 +38,10 @@ class Magento extends Log {
         fetch(this.config.logUrl)
             .then(response => response.text())
             .then(data => {
+                if (this.currentLogKey === data.length) {
+                    return;
+                }
+                this.currentLogKey = data.length;
                 const groupedByTimestamp = [];
                 const lines = data.split('\n');
                 let currentLog = JSON.parse(JSON.stringify(baseLog));

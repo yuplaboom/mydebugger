@@ -16,6 +16,10 @@ class Root extends Log {
         fetch(this.config.logUrl)
             .then(response => response.text())
             .then(data => {
+                if (this.currentLogKey.length === data.length) {
+                    return;
+                }
+                this.currentLogKey = data.length;
                 const groupedByTimestamp = [];
                 const lines = data.split('\n');
                 const baseLog = {

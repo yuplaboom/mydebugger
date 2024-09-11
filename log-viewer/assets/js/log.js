@@ -1,4 +1,5 @@
 class Log {
+    currentLogKey = '';
     tooLongStrings = {};
     container;
     config;
