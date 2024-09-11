@@ -1,4 +1,5 @@
 class Log {
+    tooLongStrings = {};
     container;
     config;
     constructor(config, container) {
@@ -6,10 +7,12 @@ class Log {
         this.container = container;
         this.container.querySelector('.clearButton').addEventListener('click', this.clearLog.bind(this));
         this.container.querySelector('.logContent').addEventListener('click', (event) => {
-            if (event.target && event.target.matches('.toCopy')) {
+            if (event.target && event.target.classList.contains('toCopy')) {
                 event.preventDefault();
                 let value = "";
-                if (event.target.getAttribute('data-target')) {
+                if (event.target.getAttribute('data-copy-id')) {
+                    value = this.tooLongStrings[event.target.getAttribute('data-copy-id')];
+                } else if (event.target.getAttribute('data-target')) {
                     value = document.querySelector(event.target.getAttribute('data-target')).textContent;
                 } else if (event.target.getAttribute('data-path')) {
                     value = event.target.getAttribute('data-path');
@@ -67,10 +70,16 @@ class Log {
     formatJsonToHtml(data, allowCopy = false) {
         let fakeUuid = "id" + Math.random().toString(16).slice(2);
         let string = "";
-        if (allowCopy) {
-            string += '<a class="toCopy" href="javascript:void(0);" data-target="#'+fakeUuid+'">Copier</a><br>';
+        let stringifiedData = this.stringifyJSON(data);
+        if (stringifiedData.length > 1000) {
+            allowCopy = true;
+            this.tooLongStrings[fakeUuid] = stringifiedData;
+            stringifiedData = stringifiedData.slice(0, 1000) + '...<a class="text-warning toCopy" data-copy-id="'+fakeUuid+'" href="javascript:(void);">too Long data, click to copy</a>';
         }
-        string += '<div id="'+fakeUuid+'">'+this.stringifyJSON(data)+'</div>';
+        if (allowCopy) {
+            string += '<a class="toCopy" data-copy-id="'+fakeUuid+'" href="javascript:void(0);" data-target="#'+fakeUuid+'">Copier</a><br>';
+        }
+        string += '<div id="'+fakeUuid+'">'+stringifiedData+'</div>';
 
         return string;
     }
