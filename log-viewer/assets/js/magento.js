@@ -76,6 +76,11 @@ class Magento extends Log {
                         currentLog.url = urlMatch[1];
                         continue;
                     }
+                    const processTime = line.match(/Process Time:\s*(.*)/);
+                    if (processTime) {
+                        currentLog.processTime = processTime[1];
+                        continue;
+                    }
                     const controllerMatch = line.match(/Controller:\s*([\w_]+::[\w_]+)/);
                     if (controllerMatch) {
                         currentLog.controller = controllerMatch[1];
@@ -185,7 +190,20 @@ class Magento extends Log {
                     }
                     let newElement = document.createElement('div');
 
-                    newElement.append(createEl(`<div><a class="logLine" data-bs-toggle="collapse" href="#panel-${i}">${log.formattedTimestamp} - ${log.url} - ${log.requestMethod} - ${log.statusCode} ${log.apiStatusCode ? '- '+log.apiStatusCode : ''}</a></div>`));
+                    let strProcessTime = "";
+                    if (log.processTime) {
+                        let strProcess = log.processTime + 'ms';
+                        let strClass = "text-info";
+                        if (log.processTime > 5000) {
+                            strClass = "text-danger";
+                            strProcess = log.processTime/1000 + 's';
+                        } else if (log.processTime > 2000) {
+                            strClass = "text-warning";
+                            strProcess = log.processTime/1000 + 's';
+                        }
+                        strProcessTime = ' - <span class="'+strClass+'">'+strProcess+'</span>';
+                    }
+                    newElement.append(createEl(`<div><a class="logLine" data-bs-toggle="collapse" href="#panel-${i}">${log.formattedTimestamp}${strProcessTime} - ${log.url} - ${log.requestMethod} - ${log.statusCode}${log.apiStatusCode ? ' - '+log.apiStatusCode : ''}</a></div>`));
                     let collapse = createEl(`<div class="collapse" id="panel-${i}"></div>`);
                     collapse.append(createEl(`<div class="logLine"><span class="h2">Controller:</span> <a class="path toCopy controller" href="#" data-path="${log.controller}">${log.controller}</a></div>`));
                     if (log.errors.length) {

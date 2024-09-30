@@ -2,8 +2,47 @@
 <config>
     <modules>
         <Debugger_Logs>
-            <active>true</active>
-            <codePool>local</codePool>
+            <version>0.1.0</version>
         </Debugger_Logs>
     </modules>
+    <global>
+        <events>
+            <controller_front_init_before>
+                <observers>
+                    <templatelogger_capture_request>
+                        <type>singleton</type>
+                        <class>Debugger_Logs_Model_Observer</class>
+                        <method>captureRequest</method>
+                    </templatelogger_capture_request>
+                </observers>
+            </controller_front_init_before>
+            <controller_action_predispatch>
+                <observers>
+                    <templatelogger_capture_controller>
+                        <type>singleton</type>
+                        <class>Debugger_Logs_Model_Observer</class>
+                        <method>captureControllerInfo</method>
+                    </templatelogger_capture_controller>
+                </observers>
+            </controller_action_predispatch>
+            <controller_action_postdispatch>
+                <observers>
+                    <templatelogger>
+                        <type>singleton</type>
+                        <class>Debugger_Logs_Model_Observer</class>
+                        <method>logTemplates</method>
+                    </templatelogger>
+                </observers>
+            </controller_action_postdispatch>
+            <log_exception>
+                <observers>
+                    <debugger_logs_log_exception>
+                        <type>singleton</type>
+                        <class>Debugger_Logs_Model_Observer</class>
+                        <method>handleLoggedException</method>
+                    </debugger_logs_log_exception>
+                </observers>
+            </log_exception>
+        </events>
+    </global>
 </config>
