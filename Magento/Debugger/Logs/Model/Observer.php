@@ -23,6 +23,17 @@ class Debugger_Logs_Model_Observer
         'Mage_Cms_IndexController'
     ];
 
+    public function checkAdminLoggedAsCustomer($observer)
+    {
+        $session = Mage::getSingleton('customer/session');
+        if ($session->isLoggedIn()) {
+            $customer = $session->getCustomer();
+            $message = "⚠️ Vous êtes actuellement connecté en tant que <strong>{$customer->getName()}</strong> (ID: {$customer->getId()}) sur le frontend.";
+
+            Mage::getSingleton('adminhtml/session')->addWarning($message);
+        }
+    }
+
     public function logTemplates(Varien_Event_Observer $observer)
     {
         if (Mage::getIsDeveloperMode() === false) {
@@ -242,7 +253,12 @@ class Debugger_Logs_Model_Observer
     protected function sendLog(): void
     {
         $this->isLogged = true;
-        Mage::log($this->logMessage, null, self::LOG_FILENAME, true);
+        $logger = new \Monolog\Logger('debugger_logs');
+        $handler = new \Monolog\Handler\StreamHandler(Mage::getBaseDir('log') . '/debugger_logs.log', \Monolog\Level::Debug);
+        $formatter = new \Monolog\Formatter\LineFormatter("%datetime% %channel%.%level_name%: %message%\n", "Y-m-d H:i:s", true, true);
+        $handler->setFormatter($formatter);
+        $logger->pushHandler($handler);
+        $logger->debug($this->logMessage);
     }
 
     protected function initFormattedLog(int $statusCode)

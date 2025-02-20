@@ -48,22 +48,23 @@ class Magento extends Log {
 
                 for (let i = 0; i < lines.length; i++) {
                     let line = lines[i];
-                    const timestampMatch = line.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})/);
                     let formattedTimestamp = '';
+                    // match pour une ligne formattée de cette maniere  : "2025-02-24 20:16:16 debugger_logs.DEBUG:" mais qui ne match pas "Request Time: 2025-02-24 20:15:54"
+                    const timestampMatch = line.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} debugger_logs\.\w+:/)
+
                     if (timestampMatch) {
                         if (currentLog.timestamp !== null) {
                             currentLog.id = md5(currentLog.timestamp + currentLog.url + currentLog.controller);
                             groupedByTimestamp.push(currentLog);
                             currentLog = JSON.parse(JSON.stringify(baseLog));
                         }
-                        const timestamp = new Date(timestampMatch[0]);
-
-                        const datePart = timestamp.toISOString().split('T')[0];
-                        const timePart = timestamp.toTimeString().split(' ')[0];
-                        formattedTimestamp = `${datePart} - ${timePart}`;
-                        currentLog.formattedTimestamp = formattedTimestamp;
-                        currentLog.timestamp = timestamp;
+                        currentLog.timestamp = timestampMatch[1];
                         continue;
+                    }
+
+                    const requestTime = line.match(/Request Time:\s*(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/);
+                    if (requestTime) {
+                        currentLog.formattedTimestamp = requestTime[1];
                     }
 
                     const statusCode = line.match(/HTTP Response Status:\s*(\d+)/);
